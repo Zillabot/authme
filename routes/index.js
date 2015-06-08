@@ -7,6 +7,7 @@ This is a request handler for loading the main page. It will check to see if
 a user is logged in, and render the index page either way.
 */
 router.get('/', function(request, response, next) {
+
   var username;
   /*
   Check to see if a user is logged in. If they have a cookie called
@@ -21,7 +22,9 @@ router.get('/', function(request, response, next) {
   render the index page. The username variable will be either null
   or a string indicating the username.
   */
-  response.render('index', { title: 'Authorize Me!', username: username });
+  response.render('index', 
+  { title: 'Tweeter', username: username }
+  );
 });
 
 /*
@@ -37,6 +40,8 @@ It has some bugs:
   without complaint.
 */
 router.post('/register', function(request, response) {
+
+  // console.log(request.body)
   /*
   request.body is an object containing the data submitted from the form.
   Since we're in a POST handler, we use request.body. A GET handler would use
@@ -55,6 +60,29 @@ router.post('/register', function(request, response) {
       database = app.get('database');
 
   if (password === password_confirm) {
+    
+    // To prevent username duplication
+  database('users').select().where({'username' : username})
+    .then(function(results) {
+    if(results.length === 0) {
+      database('users').insert({
+        username: username,
+        password: password,
+      }).then(function() {
+        response.cookie('username', username);
+        response.redirect('/');
+      });  
+    }// end of 'if'
+    else {
+      response.render('index', {
+        title: 'Tweeter',
+        user: null,
+        error: "User already exists.  Pick another name"
+      })
+    }
+  })
+
+    
     /*
     This will insert a new record into the users table. The insert
     function takes an object whose keys are column names and whose values
@@ -63,11 +91,8 @@ router.post('/register', function(request, response) {
     This uses a "promise" interface. It's similar to the callbacks we've
     worked with before. insert({}).then(function() {...}) is very similar
     to insert({}, function() {...});
-    */
-    database('users').insert({
-      username: username,
-      password: password,
-    }).then(function() {
+    *
+      
       /*
       Here we set a "username" cookie on the response. This is the cookie
       that the GET handler above will look at to determine if the user is
@@ -76,9 +101,6 @@ router.post('/register', function(request, response) {
       Then we redirect the user to the root path, which will cause their
       browser to send another request that hits that GET handler.
       */
-      response.cookie('username', username)
-      response.redirect('/');
-    });
   } else {
     /*
     The user mistyped either their password or the confirmation, or both.
@@ -86,7 +108,7 @@ router.post('/register', function(request, response) {
     wrong.
     */
     response.render('index', {
-      title: 'Authorize Me!',
+      title: 'Tweeter',
       user: null,
       error: "Password didn't match confirmation"
     });
@@ -127,7 +149,7 @@ router.post('/login', function(request, response) {
     */
     if (records.length === 0) {
         response.render('index', {
-          title: 'Authorize Me!',
+          title: 'Tweeter',
           user: null,
           error: "No such user"
         });
@@ -148,13 +170,17 @@ router.post('/login', function(request, response) {
         index page, with an error telling the user what happened.
         */
         response.render('index', {
-          title: 'Authorize Me!',
+          title: 'Tweeter',
           user: null,
           error: "Password incorrect"
         });
       }
     }
   });
-});
+}
+router.post("/tweet", function(request, response){
+  
+})
+);
 
 module.exports = router;

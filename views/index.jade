@@ -6,6 +6,10 @@ block content
     h3= error
   if username
     p You are currently logged in as #{ username }
+    div
+      form(method="post" action="/tweet")
+        input(type="text" name="twit" placeholder="twit")
+        input(type="submit")
   else
     p You are not logged in. Would you like to be?
     div
