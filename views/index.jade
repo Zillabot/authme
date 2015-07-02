@@ -8,13 +8,20 @@ block content
     p You are currently logged in as #{ username }
     div
       form(method="post" action="/tweet")
-        input(type="text" name="twit" placeholder="twit")
-        input(type="submit")
+        input.tweet#input_text(type="text" name="tweet" placeholder="twit")
+        input.tweet(type="submit")
+    div
+      form(method="post" action="/logout")
+        input(type="submit" value="Logout")      
+    div
+      each val in tweets 
+        p= val.tweet
+               
   else
-    p You are not logged in. Would you like to be?
+    
     div
       form(method="post" action="/register")
-        h2 Register a new account
+        h2 Register
         div
           label Username:
             input(type="text" name="username" placeholder="username")
@@ -28,7 +35,7 @@ block content
           input(type="submit" value="Pleased to meet you!")
     div
       form(method="post" action="/login")
-        h2 Log into an existing account
+        h2 Log in
         div
           label Username:
             input(type="text" name="username" placeholder="username")
